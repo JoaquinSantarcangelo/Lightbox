@@ -1,4 +1,6 @@
-export type EffectId = 'solid' | 'pulse' | 'breathe' | 'strobe';
+export type EffectId = 'static' | 'solid' | 'pulse' | 'breathe' | 'strobe';
+
+export type ShapeId = 'softbox' | 'ring';
 
 export type ClockSource = 'off' | 'audio' | 'manual' | 'tap' | 'midi';
 

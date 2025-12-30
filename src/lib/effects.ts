@@ -1,7 +1,15 @@
 import type { EffectSettings, HSL, LightingEffect } from '@/types';
 import { clamp } from './colors';
 
-// Solid - no animation, just return base color
+// Static - constant color, ignores clock sync
+const staticEffect: LightingEffect = {
+  id: 'static',
+  name: 'Static',
+  icon: '■',
+  compute: (baseColor) => baseColor,
+};
+
+// Solid - no animation, syncs to clock for beat flash
 const solid: LightingEffect = {
   id: 'solid',
   name: 'Solid',
@@ -58,6 +66,7 @@ const strobe: LightingEffect = {
 
 // Export all effects
 export const EFFECTS: Record<string, LightingEffect> = {
+  static: staticEffect,
   solid,
   pulse,
   breathe,

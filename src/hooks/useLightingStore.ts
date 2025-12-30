@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { AudioMode, ClockSource, ColorMode, EffectId, HSL } from '@/types';
+import type { AudioMode, ClockSource, ColorMode, EffectId, HSL, ShapeId } from '@/types';
 import {
   DEFAULT_BRIGHTNESS,
   DEFAULT_COLOR,
@@ -15,6 +15,11 @@ interface LightingState {
   brightness: number;
   temperature: number;
   colorMode: ColorMode;
+
+  // Shape
+  shape: ShapeId;
+  ringSize: number; // 10-90 (percentage of screen)
+  ringThickness: number; // 5-50 (percentage of ring size)
 
   // Effect
   effect: EffectId;
@@ -40,6 +45,9 @@ interface LightingState {
   setBrightness: (brightness: number) => void;
   setTemperature: (temperature: number) => void;
   setColorMode: (mode: ColorMode) => void;
+  setShape: (shape: ShapeId) => void;
+  setRingSize: (size: number) => void;
+  setRingThickness: (thickness: number) => void;
   setEffect: (effect: EffectId) => void;
   setEffectSpeed: (speed: number) => void;
   setEffectIntensity: (intensity: number) => void;
@@ -74,6 +82,11 @@ export const useLightingStore = create<LightingState>()(
       temperature: DEFAULT_TEMPERATURE,
       colorMode: 'manual',
 
+      // Shape defaults
+      shape: 'softbox',
+      ringSize: 80,
+      ringThickness: 15,
+
       // Effect defaults
       effect: 'solid',
       effectSpeed: DEFAULT_EFFECT_SETTINGS.speed,
@@ -103,6 +116,9 @@ export const useLightingStore = create<LightingState>()(
       setBrightness: (brightness) => set({ brightness }),
       setTemperature: (temperature) => set({ temperature }),
       setColorMode: (colorMode) => set({ colorMode }),
+      setShape: (shape) => set({ shape }),
+      setRingSize: (ringSize) => set({ ringSize: Math.max(10, Math.min(90, ringSize)) }),
+      setRingThickness: (ringThickness) => set({ ringThickness: Math.max(5, Math.min(50, ringThickness)) }),
       setEffect: (effect) => set({ effect }),
       setEffectSpeed: (effectSpeed) => set({ effectSpeed }),
       setEffectIntensity: (effectIntensity) => set({ effectIntensity }),
@@ -156,6 +172,9 @@ export const useLightingStore = create<LightingState>()(
         brightness: state.brightness,
         temperature: state.temperature,
         colorMode: state.colorMode,
+        shape: state.shape,
+        ringSize: state.ringSize,
+        ringThickness: state.ringThickness,
         effect: state.effect,
         effectSpeed: state.effectSpeed,
         effectIntensity: state.effectIntensity,

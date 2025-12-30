@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useLightingStore } from '@/hooks/useLightingStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ColorControls } from './ColorControls';
+import { ShapeControls } from './ShapeControls';
 import { EffectControls } from './EffectControls';
 import { ClockControls } from './ClockControls';
 
@@ -44,14 +45,19 @@ export function ControlPanel() {
 
             {/* Tabs */}
             <Tabs defaultValue="color" className="p-4">
-              <TabsList className="w-full grid grid-cols-3 mb-4">
+              <TabsList className="w-full grid grid-cols-4 mb-4">
                 <TabsTrigger value="color">Color</TabsTrigger>
+                <TabsTrigger value="shape">Shape</TabsTrigger>
                 <TabsTrigger value="effects">Effects</TabsTrigger>
                 <TabsTrigger value="clock">Clock</TabsTrigger>
               </TabsList>
 
               <TabsContent value="color">
                 <ColorControls />
+              </TabsContent>
+
+              <TabsContent value="shape">
+                <ShapeControls />
               </TabsContent>
 
               <TabsContent value="effects">

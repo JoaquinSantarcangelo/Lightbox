@@ -13,6 +13,9 @@ export function LightingCanvas() {
     midiDeviceId,
     audioSensitivity,
     audioSmoothing,
+    shape,
+    ringSize,
+    ringThickness,
   } = useLightingStore();
 
   const { audioData } = useAudioAnalyzer({
@@ -27,20 +30,48 @@ export function LightingCanvas() {
   });
 
   const displayColor = useLightingEffect({ audioData, midiClockData });
-  const backgroundColor = hslToCSS(displayColor, 100);
+  const color = hslToCSS(displayColor, 100);
 
+  const handleInteraction = () => togglePanel();
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === ' ' || e.key === 'Enter') togglePanel();
+  };
+
+  if (shape === 'ring') {
+    // Ring dimensions as percentages
+    const outerRadius = ringSize / 2;
+    const innerRadius = outerRadius * (1 - ringThickness / 100);
+
+    // Create radial gradient for ring effect
+    const ringGradient = `radial-gradient(circle,
+      transparent ${innerRadius}%,
+      ${color} ${innerRadius}%,
+      ${color} ${outerRadius}%,
+      transparent ${outerRadius}%
+    )`;
+
+    return (
+      <div
+        className="fixed inset-0 w-screen h-screen bg-black cursor-pointer"
+        style={{ background: `black ${ringGradient}` }}
+        onClick={handleInteraction}
+        role="button"
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        aria-label="Click to toggle control panel"
+      />
+    );
+  }
+
+  // Default softbox mode - full screen
   return (
     <div
       className="fixed inset-0 w-screen h-screen transition-colors duration-75 cursor-pointer"
-      style={{ backgroundColor }}
-      onClick={togglePanel}
+      style={{ backgroundColor: color }}
+      onClick={handleInteraction}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === ' ' || e.key === 'Enter') {
-          togglePanel();
-        }
-      }}
+      onKeyDown={handleKeyDown}
       aria-label="Click to toggle control panel"
     />
   );

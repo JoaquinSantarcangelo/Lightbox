@@ -86,6 +86,14 @@ export function useLightingEffect(options: UseLightingEffectOptions = {}) {
       const baseLightness = saturation < 10 ? 100 : 50;
       let computed: HSL = { h: hue, s: saturation, l: baseLightness };
 
+      // Static effect - pure bright, no animation
+      if (effect === 'static') {
+        const finalL = (baseLightness * brightness) / 100;
+        setDisplayColor({ h: hue, s: saturation, l: clamp(finalL, 0, 100) });
+        frameRef.current = requestAnimationFrame(animate);
+        return;
+      }
+
       const isClockActive = clockSource !== 'off';
       const effectiveBpm = getEffectiveBpm();
       const beatInterval = effectiveBpm > 0 ? 60000 / effectiveBpm : 0;
