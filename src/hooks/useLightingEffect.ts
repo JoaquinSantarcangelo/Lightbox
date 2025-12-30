@@ -136,21 +136,39 @@ export function useLightingEffect(options: UseLightingEffectOptions = {}) {
         const { bass, mid, treble } = audioData;
         const total = bass + mid + treble + 0.001;
 
-        const bassNorm = bass / total;
-        const midNorm = mid / total;
-        const trebleNorm = treble / total;
+        // Normalize bands
+        const b = bass / total;
+        const m = mid / total;
+        const t = treble / total;
 
-        // Map frequencies to hues (Traktor-style)
-        const blendHue =
-          bassNorm * 15 + // Red/Orange
-          midNorm * 90 + // Yellow/Green
-          trebleNorm * 220; // Blue/Purple
+        // Find dominant frequency band
+        const maxVal = Math.max(b, m, t);
 
-        const energy = Math.pow(total / 3, 0.7);
-        const spectrumL = 20 + energy * 80;
+        // Calculate hue based on dominant frequency with smooth blending
+        // Bass → Red (0°), Mid → Green (120°), Treble → Blue (240°)
+        let hue: number;
+
+        if (b === maxVal) {
+          // Bass dominant: red, with orange shift if mids present
+          const midInfluence = m / (b + 0.001);
+          hue = 0 + midInfluence * 40; // 0° to 40° (red → orange)
+        } else if (t === maxVal) {
+          // Treble dominant: blue/purple, with cyan shift if mids present
+          const midInfluence = m / (t + 0.001);
+          hue = 260 - midInfluence * 40; // 260° to 220° (purple → blue)
+        } else {
+          // Mid dominant: green/yellow spectrum
+          const bassInfluence = b / (m + 0.001);
+          const trebleInfluence = t / (m + 0.001);
+          hue = 120 - bassInfluence * 50 + trebleInfluence * 50; // 70° to 170° (yellow → cyan)
+        }
+
+        // Boost saturation and calculate lightness from energy
+        const energy = Math.pow(total / 3, 0.5);
+        const spectrumL = 25 + energy * 70;
 
         computed = {
-          h: blendHue % 360,
+          h: ((hue % 360) + 360) % 360,
           s: 100,
           l: spectrumL,
         };
