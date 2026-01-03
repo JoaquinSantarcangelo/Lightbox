@@ -3,17 +3,25 @@
 import { useEffect } from 'react';
 import { LightingCanvas } from '@/components/LightingCanvas';
 import { ControlPanel } from '@/components/ControlPanel';
+import { ClockDataProvider } from '@/hooks/useClockData';
 import { useLightingStore } from '@/hooks/useLightingStore';
 import { COLOR_PRESETS } from '@/lib/colors';
 
 export default function Home() {
-  const { togglePanel, setPanel, setColor } = useLightingStore();
+  const { setPanel, setColor } = useLightingStore();
 
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing in an input
-      if (e.target instanceof HTMLInputElement) return;
+      // Don't trigger if user is typing in a form field
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLSelectElement ||
+        (e.target instanceof HTMLElement && e.target.isContentEditable)
+      ) {
+        return;
+      }
 
       switch (e.key) {
         case 'Escape':
@@ -49,12 +57,12 @@ export default function Home() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [togglePanel, setPanel, setColor]);
+  }, [setPanel, setColor]);
 
   return (
-    <>
+    <ClockDataProvider>
       <LightingCanvas />
       <ControlPanel />
-    </>
+    </ClockDataProvider>
   );
 }

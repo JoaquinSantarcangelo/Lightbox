@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { AudioData, HSL, MidiClockData } from '@/types';
 import { EFFECTS } from '@/lib/effects';
 import { clamp } from '@/lib/colors';
+import { getEffectiveBpm } from '@/lib/clock';
 import { useLightingStore } from './useLightingStore';
 
 interface UseLightingEffectOptions {
@@ -35,28 +36,6 @@ export function useLightingEffect(options: UseLightingEffectOptions = {}) {
   const frameRef = useRef<number>(0);
   const startTimeRef = useRef<number>(0);
   const lastBeatTimeRef = useRef<number>(0);
-
-  // Calculate effective BPM from any clock source
-  const getEffectiveBpm = useCallback((): number => {
-    if (clockSource === 'audio' && audioData?.bpm) {
-      return audioData.bpm;
-    }
-    if (clockSource === 'midi' && midiClockData?.bpm) {
-      return midiClockData.bpm;
-    }
-    if (clockSource === 'manual') {
-      return manualBpm;
-    }
-    if (clockSource === 'tap' && tapTimes.length >= 2) {
-      const intervals: number[] = [];
-      for (let i = 1; i < tapTimes.length; i++) {
-        intervals.push(tapTimes[i] - tapTimes[i - 1]);
-      }
-      const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-      return Math.round(60000 / avgInterval);
-    }
-    return 0;
-  }, [clockSource, audioData?.bpm, midiClockData?.bpm, manualBpm, tapTimes]);
 
   // Check if we're on a beat (for manual/tap clock sources)
   const isOnBeat = useCallback(
@@ -95,7 +74,13 @@ export function useLightingEffect(options: UseLightingEffectOptions = {}) {
       }
 
       const isClockActive = clockSource !== 'off';
-      const effectiveBpm = getEffectiveBpm();
+      const effectiveBpm = getEffectiveBpm({
+        clockSource,
+        manualBpm,
+        tapTimes,
+        audioBpm: audioData?.bpm,
+        midiBpm: midiClockData?.bpm,
+      });
       const beatInterval = effectiveBpm > 0 ? 60000 / effectiveBpm : 0;
 
       // Determine if we're on a beat
@@ -257,7 +242,8 @@ export function useLightingEffect(options: UseLightingEffectOptions = {}) {
       audioMode,
       audioData,
       midiClockData,
-      getEffectiveBpm,
+      manualBpm,
+      tapTimes,
       isOnBeat,
     ]
   );

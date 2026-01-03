@@ -7,6 +7,7 @@ import {
   DEFAULT_TEMPERATURE,
 } from '@/lib/colors';
 import { DEFAULT_EFFECT_SETTINGS } from '@/lib/effects';
+import { getEffectiveBpm } from '@/lib/clock';
 
 interface LightingState {
   // Color
@@ -152,16 +153,11 @@ export const useLightingStore = create<LightingState>()(
       isClockActive: () => get().clockSource !== 'off',
       getEffectiveBpm: () => {
         const state = get();
-        if (state.clockSource === 'manual') return state.manualBpm;
-        if (state.clockSource === 'tap' && state.tapTimes.length >= 2) {
-          const intervals: number[] = [];
-          for (let i = 1; i < state.tapTimes.length; i++) {
-            intervals.push(state.tapTimes[i] - state.tapTimes[i - 1]);
-          }
-          const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-          return Math.round(60000 / avgInterval);
-        }
-        return 0; // Audio mode returns 0, actual BPM comes from audio analyzer
+        return getEffectiveBpm({
+          clockSource: state.clockSource,
+          manualBpm: state.manualBpm,
+          tapTimes: state.tapTimes,
+        });
       },
     }),
     {

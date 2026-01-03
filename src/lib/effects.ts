@@ -1,4 +1,4 @@
-import type { EffectSettings, HSL, LightingEffect } from '@/types';
+import type { EffectId, EffectSettings, HSL, LightingEffect } from '@/types';
 import { clamp } from './colors';
 
 // Static - constant color, ignores clock sync
@@ -65,7 +65,7 @@ const strobe: LightingEffect = {
 };
 
 // Export all effects
-export const EFFECTS: Record<string, LightingEffect> = {
+export const EFFECTS: Record<EffectId, LightingEffect> = {
   static: staticEffect,
   solid,
   pulse,

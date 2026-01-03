@@ -1,11 +1,11 @@
 'use client';
 
 import { useLightingStore } from '@/hooks/useLightingStore';
-import { useAudioAnalyzer } from '@/hooks/useAudioAnalyzer';
-import { useMidiClock } from '@/hooks/useMidiClock';
+import { useClockData } from '@/hooks/useClockData';
 import { Slider } from '@/components/ui/slider';
 import type { AudioMode, ClockSource } from '@/types';
 import { cn } from '@/lib/utils';
+import { getEffectiveBpm } from '@/lib/clock';
 
 const CLOCK_SOURCES: { id: ClockSource; name: string }[] = [
   { id: 'off', name: 'Off' },
@@ -37,32 +37,26 @@ export function ClockControls() {
     setAudioMode,
     setAudioSensitivity,
     setAudioSmoothing,
-    getEffectiveBpm,
   } = useLightingStore();
 
-  const { audioData, error: audioError, isListening } = useAudioAnalyzer({
-    enabled: clockSource === 'audio',
-    sensitivity: audioSensitivity,
-    smoothing: audioSmoothing,
-  });
-
   const {
-    clockData: midiClockData,
-    devices: midiDevices,
-    error: midiError,
-    isSupported: midiSupported,
-    refreshDevices,
-  } = useMidiClock({
-    enabled: clockSource === 'midi',
-    deviceId: midiDeviceId,
-  });
+    audioData,
+    audioError,
+    isListening,
+    midiClockData,
+    midiDevices,
+    midiError,
+    midiSupported,
+    refreshMidiDevices,
+  } = useClockData();
 
-  const effectiveBpm =
-    clockSource === 'audio'
-      ? audioData.bpm
-      : clockSource === 'midi'
-        ? midiClockData.bpm
-        : getEffectiveBpm();
+  const effectiveBpm = getEffectiveBpm({
+    clockSource,
+    manualBpm,
+    tapTimes,
+    audioBpm: audioData.bpm,
+    midiBpm: midiClockData.bpm,
+  });
 
   const tapCount = tapTimes.length;
 
@@ -275,7 +269,7 @@ export function ClockControls() {
                     MIDI Device
                   </label>
                   <button
-                    onClick={refreshDevices}
+                    onClick={refreshMidiDevices}
                     className="text-xs text-stone-400 hover:text-stone-300 underline"
                   >
                     Refresh
