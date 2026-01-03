@@ -2,32 +2,18 @@
 
 import { useLightingEffect } from '@/hooks/useLightingEffect';
 import { useLightingStore } from '@/hooks/useLightingStore';
-import { useAudioAnalyzer } from '@/hooks/useAudioAnalyzer';
-import { useMidiClock } from '@/hooks/useMidiClock';
+import { useClockData } from '@/hooks/useClockData';
 import { hslToCSS } from '@/lib/colors';
 
 export function LightingCanvas() {
   const {
     togglePanel,
-    clockSource,
-    midiDeviceId,
-    audioSensitivity,
-    audioSmoothing,
     shape,
     ringSize,
     ringThickness,
   } = useLightingStore();
 
-  const { audioData } = useAudioAnalyzer({
-    enabled: clockSource === 'audio',
-    sensitivity: audioSensitivity,
-    smoothing: audioSmoothing,
-  });
-
-  const { clockData: midiClockData } = useMidiClock({
-    enabled: clockSource === 'midi',
-    deviceId: midiDeviceId,
-  });
+  const { audioData, midiClockData } = useClockData();
 
   const displayColor = useLightingEffect({ audioData, midiClockData });
   const color = hslToCSS(displayColor, 100);

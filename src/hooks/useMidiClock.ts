@@ -67,6 +67,13 @@ export function useMidiClock({
       });
       setDevices(inputDevices);
       setError(null);
+      access.onstatechange = () => {
+        const refreshed: MidiDevice[] = [];
+        access.inputs.forEach((input) => {
+          refreshed.push({ id: input.id, name: input.name || 'Unknown Device' });
+        });
+        setDevices(refreshed);
+      };
       setIsReady(true);
     } catch (err) {
       setError('Failed to access MIDI devices');
@@ -171,6 +178,9 @@ export function useMidiClock({
       setClockData(DEFAULT_CLOCK_DATA);
       pulseTimesRef.current = [];
       pulseCountRef.current = 0;
+      if (midiAccessRef.current) {
+        midiAccessRef.current.onstatechange = null;
+      }
       setIsReady(false);
     }
   }, [enabled]);

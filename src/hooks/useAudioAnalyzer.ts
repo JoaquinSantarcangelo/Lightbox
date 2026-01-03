@@ -73,6 +73,7 @@ export function useAudioAnalyzer({
       const source = audioContext.createMediaStreamSource(stream);
       const analyzer = audioContext.createAnalyser();
       analyzer.fftSize = 512; // Higher resolution for better bass detection
+      // Analyzer smoothing handles raw FFT jitter; UI smoothing further eases display values.
       analyzer.smoothingTimeConstant = 0.3; // Less smoothing for faster response
       source.connect(analyzer);
       analyzerRef.current = analyzer;
@@ -166,7 +167,7 @@ export function useAudioAnalyzer({
         }
       }
 
-      // Apply smoothing to frequency data (but not kick detection)
+      // Apply UI smoothing to frequency data (but not kick detection)
       const smoothFactor = smoothing / 100;
 
       setAudioData((prev) => ({
